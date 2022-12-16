@@ -1,0 +1,11 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+jobs:
+  ci:
+    uses: dropecho/.github/.github/workflows/haxe-ci.yml@main
+    secrets: inherit

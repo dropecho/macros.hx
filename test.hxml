@@ -1,0 +1,37 @@
+-cp src
+-cp test
+
+#test libs
+-lib munit
+-lib hamcrest
+-lib tink_macro
+
+-main TestMain
+-neko artifacts/test/test.n
+
+--next
+-cp src
+-cp test
+
+#test libs
+-lib munit
+-lib hamcrest
+-lib hxnodejs
+-lib tink_macro
+
+-D js-es=6
+
+-main TestMain
+-js artifacts/test/js_test.js
+
+--next
+-cp src
+-cp test
+
+#test libs
+-lib munit
+-lib hamcrest
+-lib tink_macro
+
+-main TestMain
+-cs artifacts/test/cs_test/
