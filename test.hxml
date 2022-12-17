@@ -2,36 +2,27 @@
 -cp test
 
 #test libs
--lib munit
--lib hamcrest
 -lib tink_macro
+-lib autotest
+-lib buddy
 
--main TestMain
--neko artifacts/test/test.n
+--each
 
 --next
--cp src
--cp test
-
-#test libs
--lib munit
--lib hamcrest
 -lib hxnodejs
--lib tink_macro
-
 -D js-es=6
-
--main TestMain
 -js artifacts/test/js_test.js
+# --next
+# -neko artifacts/test/test.n
+# --next
+# -cs artifacts/test/cs_test
 
 --next
--cp src
--cp test
+--cmd echo "JS TESTS"
+--cmd node ./artifacts/test/js_test.js
 
-#test libs
--lib munit
--lib hamcrest
--lib tink_macro
+# --cmd echo "NEKO TESTS"
+# --cmd neko ./artifacts/test/test.n
 
--main TestMain
--cs artifacts/test/cs_test/
+# --cmd echo "CS TESTS"
+# --cmd ./artifacts/test/cs_test/bin/AutoTest.exe

@@ -34,6 +34,43 @@ class Constructor {
 		return fields;
 	}
 
+	macro static public function fromFields(allOpt:Bool = false):Array<Field> {
+		var fields = Context.getBuildFields();
+		var constructorArgs = [];
+		var assignmentExprs = [];
+
+		// build list of args for constructor from fields.
+		for (f in fields) {
+			switch (f.kind) {
+				case FVar(t, val):
+					constructorArgs.push({
+						name: f.name,
+						type: t,
+						opt: allOpt,
+            value: TypeMacros.isConstant(val) ? $v{val} : null
+					});
+					f.kind = FieldType.FVar(t, null);
+				default:
+			}
+		}
+
+		if (constructorArgs.length > 0) {
+			// Create new constructor.
+			fields.push({
+				name: "new",
+				access: [APublic],
+				pos: Context.currentPos(),
+				kind: FFun({
+					args: constructorArgs,
+					expr: macro dropecho.macros.TypeBuildingMacros.initLocals(),
+					params: [],
+					ret: null
+				})
+			});
+		}
+		return fields;
+	}
+
 	macro static public function fromTypeDef(pub:Bool = false):Array<Field> {
 		var fields = Context.getBuildFields();
 		var constructor = fields.find(x -> x.name == "new");
@@ -49,12 +86,38 @@ class Constructor {
 
 		var configObj = constructorFN.args[0];
 		var objName = configObj.name;
-		buildExprs.push(macro var $objName:Dynamic = {});
 
-		var objFields = configObj.type.toType().sure().getFields();
+		var configIsClass = false;
+		var configClassName;
+		var newExpr = switch (configObj.type.toType().sure()) {
+			case TInst(t, params): {
+					configIsClass = true;
+					configClassName = t.get().name.asTypePath();
+					(macro var $objName = new $configClassName());
+				}
+			case TType(t, params): (macro var $objName:Dynamic = {});
+			default: null;
+		}
+		if (newExpr != null) {
+			buildExprs.push(newExpr);
+		}
 
-		for (field in objFields.sure()) {
+		if (configIsClass) {
+			configObj.opt = true;
+
+			if (newExpr != null) {
+				constructorExprs.push(macro $i{objName} = $i{objName} != null ? $i{objName} : new $configClassName());
+			}
+		}
+
+		var objFields = configObj.type.toType().sure().getFields().sure();
+
+		for (field in objFields) {
 			var fieldType = switch (field.type) {
+				case TType(t, params): {
+						var a = TypeParam.TPType(params[0].toComplex());
+						t.get().name.asComplexType([a, a]);
+					}
 				case TAbstract(t, _): t.get().name.asComplexType();
 				case TLazy(t): switch (t()) {
 						case TAbstract(t, _): t.get().name.asComplexType();
@@ -80,11 +143,17 @@ class Constructor {
 			buildArgs.push({
 				name: field.name,
 				type: fieldType,
-				opt: true,
+				opt: configIsClass,
+				//         value: valExpr != null ? $e{valExpr} : null
 			});
 
 			// Build assignment expressions for the built config object and the constructor.
-			buildExprs.push(macro $p{[objName, field.name]} = $i{field.name});
+			if (configIsClass) {
+				buildExprs.push(macro $p{[objName, field.name]} = $i{field.name} != null ? $i{field.name} : $p{[objName, field.name]});
+			} else {
+				buildExprs.push(macro $p{[objName, field.name]} = $i{field.name});
+			}
+
 			constructorExprs.push(macro $p{["this", field.name]} = $p{[objName, field.name]});
 		}
 
@@ -108,44 +177,6 @@ class Constructor {
 		});
 
 		constructorFN.expr = macro $b{constructorExprs};
-		return fields;
-	}
-
-	macro static public function fromFields(allOpt:Bool = false):Array<Field> {
-		var fields = Context.getBuildFields();
-		var constructorArgs = [];
-		var assignmentExprs = [];
-
-		// build list of args for constructor from fields.
-		for (f in fields) {
-			switch (f.kind) {
-				case FVar(t, val):
-					constructorArgs.push({
-						name: f.name,
-						type: t,
-						opt: allOpt,
-						value: !TypeMacros.isEmpty(val) ? $e{val} : null
-					});
-
-					f.kind = FieldType.FVar(t, null);
-				default:
-			}
-		}
-
-		if (constructorArgs.length > 0) {
-			// Create new constructor.
-			fields.push({
-				name: "new",
-				access: [APublic],
-				pos: Context.currentPos(),
-				kind: FFun({
-					args: constructorArgs,
-					expr: macro dropecho.macros.TypeBuildingMacros.initLocals(),
-					params: [],
-					ret: null
-				})
-			});
-		}
 		return fields;
 	}
 }
