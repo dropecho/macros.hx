@@ -6,9 +6,7 @@
   "repository": "github:dropecho/macros.hx",
   "license": "MIT",
   "scripts": {
-    "build": "npm run clean && haxe build.hxml",
-    "test": "haxelib run munit t",
-    "clean": "rm -rf dist && rm -rf artifacts"
+    "test": "haxe test.hxml"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.2",

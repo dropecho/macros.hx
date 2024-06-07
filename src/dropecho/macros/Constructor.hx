@@ -11,7 +11,17 @@ using Lambda;
 typedef TypeMacros = dropecho.macros.TypeBuildingMacros;
 
 class Constructor {
-	macro static public function fromParams(pub:Bool = false):Array<Field> {
+	/**
+		Builds the body of a constructor based on the arguments.
+		Also creates fields on the class from them. 
+
+		i.e. function new(a:Int, b:Int); 
+		this creates fields a,b on class, and assigns the passed value in body.
+
+		@param [pub] Should the created fields be public. 
+		@returns The created fields. 
+	 */
+	macro static public function fromArgs(pub:Bool = false):Array<Field> {
 		var fields = Context.getBuildFields();
 		var constructor = fields.find(x -> x.name == "new");
 
@@ -34,6 +44,12 @@ class Constructor {
 		return fields;
 	}
 
+	/**
+	 * Auto creates a constructor based on the fields of a class.
+	 *
+	 * @param [allOpt] Should all the params be optional? 
+	 * @returns The fields (including the generated constructor) in an array. 
+	 */
 	macro static public function fromFields(allOpt:Bool = false):Array<Field> {
 		var fields = Context.getBuildFields();
 		var constructorArgs = [];
@@ -47,7 +63,7 @@ class Constructor {
 						name: f.name,
 						type: t,
 						opt: allOpt,
-            value: TypeMacros.isConstant(val) ? $v{val} : null
+						value: TypeMacros.isConstant(val) ? $v{val} : null
 					});
 					f.kind = FieldType.FVar(t, null);
 				default:

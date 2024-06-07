@@ -2,7 +2,9 @@
   "name": "dropecho.macros",
   "description": "A set of utlity macros for haxe.",
   "classPath": "src/",
-  "dependencies": {},
+  "dependencies": {
+    "tink_macro": ""
+  },
   "url": "https://github.com/dropecho/macros.hx",
   "contributors": [
     "vantreeseba"

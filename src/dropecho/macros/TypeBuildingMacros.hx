@@ -7,6 +7,13 @@ import haxe.macro.ExprTools;
 using Lambda;
 
 class TypeBuildingMacros {
+	/**
+		Checks if an expression if null or empty.
+		If expression is function, checks if the body is empty. 
+
+		@param expr - The expression to check.
+		@returns [TODO:description]
+	 */
 	static public function isEmpty(expr:Expr) {
 		if (expr == null) {
 			return true;
@@ -17,6 +24,9 @@ class TypeBuildingMacros {
 		}
 	}
 
+	/**
+	 * Checks if an expression is a constant expr.
+	 */
 	static public function isConstant(expr:Expr) {
 		if (isEmpty(expr)) {
 			return false;

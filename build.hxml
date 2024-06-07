@@ -1,8 +1,0 @@
-# CODE PATH
--D analyzer-optimize
--L tink_macro
-
--cp src
---macro include('', true, null, ['src'])
-
-targets/docs.hxml

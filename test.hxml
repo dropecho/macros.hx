@@ -1,25 +1,35 @@
--cp src
--cp test
+--class-path src
+--class-path test
 
 #test libs
--lib tink_macro
--lib autotest
--lib buddy
+# -lib autotest
+--library tink_macro
+--library buddy
+--library instrument
+--define buddy-colors
 
---each
+--macro instrument.Instrumentation.coverage(['dropecho'], ['src'], [])
+--define coverage-console-summary-reporter
+--define coverage-lcov-reporter
 
---next
--lib hxnodejs
--D js-es=6
--js artifacts/test/js_test.js
+-x TestMain
+
+# --each
+
+# --next
+# -lib hxnodejs
+# -D js-es=6
+# -js artifacts/test/js_test.js
+
+
 # --next
 # -neko artifacts/test/test.n
 # --next
 # -cs artifacts/test/cs_test
 
---next
---cmd echo "JS TESTS"
---cmd node ./artifacts/test/js_test.js
+# --next
+# --cmd echo "JS TESTS"
+# --cmd node ./artifacts/test/js_test.js
 
 # --cmd echo "NEKO TESTS"
 # --cmd neko ./artifacts/test/test.n
