@@ -1,6 +1,6 @@
 {
   "branches": [
-    "none"
+    "main"
   ],
   "tagFormat": "${version}",
   "plugins": [
