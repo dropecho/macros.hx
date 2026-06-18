@@ -59,6 +59,27 @@ class Point {
 
 The boolean argument on each macro controls whether the generated fields are public.
 
+### `MakeOptional.OptionalType.optional`
+
+Copy another type's variable fields onto a class as public, optional (`Null<T>`) fields.
+
+```haxe
+class Point {
+	var x:Int;
+	var y:Int;
+
+	public function new() {}
+}
+
+@:build(dropecho.macros.MakeOptional.OptionalType.optional(Point))
+class Config {
+	public function new() {}
+}
+
+var c = new Config();
+c.x = 1; // x and y copied from Point as Null<Int>
+```
+
 ## Development
 
 ```bash
@@ -67,11 +88,6 @@ npm test   # run the utest suite (via dropecho.testing)
 
 Tests are auto-discovered: any `test/**/*Tests.hx` class extending `utest.Test` is picked
 up by `dropecho.testing` — there is no hand-written test main.
-
-## Status
-
-`MakeOptional` and the default-value handling in `Constructor.fromFields` are works in
-progress. See **AGENTS.md** for details.
 
 ## License
 

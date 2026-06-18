@@ -34,7 +34,7 @@ ships no runtime code of its own.
 |---|---|---|
 | `Constructor` | `src/dropecho/macros/Constructor.hx` | `@:build` macros that generate constructors/fields: `fromArgs` (fill an empty constructor's body + fields from its args), `fromFields` (build a constructor from the class's variable fields), `fromTypeDef` (build a class + static `build` from a single config-object argument) |
 | `TypeBuildingMacros` | `src/dropecho/macros/TypeBuildingMacros.hx` | Shared compile-time helpers: `isEmpty`, `isConstant`, `createFieldFromArg`, and the `initLocals` macro used as the generated constructor body |
-| `MakeOptional` | `src/dropecho/macros/MakeOptional.hx` | **WIP.** `OptionalType.optional` — intended to copy another type's fields onto the building class as optional fields; currently returns the class unchanged while the rewrite is worked out |
+| `MakeOptional` | `src/dropecho/macros/MakeOptional.hx` | `OptionalType.optional` — copies another type's variable fields onto the building class as public, optional (`Null<T>`) fields (methods and name collisions are skipped) |
 
 All `Constructor`/`MakeOptional` functions are `macro` functions, so the classes compile
 to nothing on a runtime target — only the code they *generate* runs. Macro-only imports
@@ -95,12 +95,14 @@ npm test             # → haxelib run dropecho.testing
 
 ---
 
-## Status / WIP
+## Status
 
-This repo is mid-feature on the `optional_type_builder` branch:
+The macros (`Constructor.fromArgs`/`fromFields`/`fromTypeDef` and
+`MakeOptional.OptionalType.optional`) are implemented and covered by the utest suite.
 
-- `MakeOptional.OptionalType.optional` is unfinished (resolves the source type's fields but
-  returns the class unchanged). See its `TODO`.
-- `Constructor.fromFields` does not yet restore a field's default value when the matching
-  constructor arg is omitted (the disabled `value:` line). See the `TODO` in
-  `ConstructorTests.hx` for the scenarios to re-enable once the macros stabilise.
+Possible follow-ups:
+
+- `fromTypeDef` currently keys off the first constructor argument; it does not support
+  multiple config arguments.
+- `MakeOptional.optional` copies fields as public; preserving the source's visibility (or
+  making it configurable) could be worthwhile.
