@@ -55,7 +55,7 @@ class TypeBuildingMacros {
 	@param pub Whether the created field should be public.
 	@return The generated field.
 	**/
-	public static function createFieldFromArg(arg, pos, doc, pub:Bool = false) {
+	public static function createFieldFromArg(arg:FunctionArg, pos:Position, doc:Null<String>, pub:Bool = false):Field {
 		var docRegex = new EReg('\\*\\s@param\\s${arg.name}\\s-?\\s?(.*)', "i");
 		var val = arg.value != null ? ExprTools.getValue(arg.value) : null;
 

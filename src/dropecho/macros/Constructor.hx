@@ -56,9 +56,11 @@ class Constructor {
 	public static macro function fromFields(allOpt:Bool = false):Array<Field> {
 		var fields = Context.getBuildFields();
 		var constructorArgs = [];
-		var assignmentExprs = [];
 
-		// Build the list of constructor args from the variable fields.
+		// Build the list of constructor args from the variable fields. A field
+		// with a constant initializer keeps it as the arg's default value, so an
+		// omitted arg falls back to that default; the field itself is nulled so
+		// the assignment in the constructor body wins.
 		for (f in fields) {
 			switch (f.kind) {
 				case FVar(t, val):
@@ -66,6 +68,7 @@ class Constructor {
 						name: f.name,
 						type: t,
 						opt: allOpt,
+						value: (val != null && TypeMacros.isConstant(val)) ? val : null
 					});
 					f.kind = FieldType.FVar(t, null);
 				default:
@@ -101,14 +104,19 @@ class Constructor {
 		var fields = Context.getBuildFields();
 		var constructor = fields.find(x -> x.name == "new");
 
-		var buildArgs = [];
-		var buildExprs = [];
-		var constructorExprs = [];
-
-		var constructorFN = switch (constructor.kind) {
+		var constructorFN = constructor == null ? null : switch (constructor.kind) {
 			case FieldType.FFun(fn): fn;
 			default: null;
 		}
+
+		if (constructorFN == null || constructorFN.args.length == 0) {
+			Context.error("Constructor.fromTypeDef requires a constructor with a single config argument.", Context.currentPos());
+			return fields;
+		}
+
+		var buildArgs = [];
+		var buildExprs = [];
+		var constructorExprs = [];
 
 		var configObj = constructorFN.args[0];
 		var objName = configObj.name;
@@ -139,18 +147,10 @@ class Constructor {
 		var objFields = configObj.type.toType().sure().getFields().sure();
 
 		for (field in objFields) {
-			var fieldType = switch (field.type) {
-				case TType(t, params): {
-						var a = TypeParam.TPType(params[0].toComplex());
-						t.get().name.asComplexType([a, a]);
-					}
-				case TAbstract(t, _): t.get().name.asComplexType();
-				case TLazy(t): switch (t()) {
-						case TAbstract(t, _): t.get().name.asComplexType();
-						default: null;
-					}
-				default: null;
-			}
+			// Resolve each config field's type to a ComplexType we can declare.
+			// toComplex() forces lazy types and handles parameterized types
+			// (e.g. Map<K, V>) correctly, unlike a hand-rolled type switch.
+			var fieldType = field.type.toComplex();
 
 			if (fieldType == null) {
 				continue;
