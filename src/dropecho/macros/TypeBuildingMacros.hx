@@ -6,15 +6,19 @@ import haxe.macro.ExprTools;
 
 using Lambda;
 
+/**
+Shared compile-time helpers used by the other build macros to inspect
+expressions and create fields/constructor bodies.
+**/
 class TypeBuildingMacros {
 	/**
-		Checks if an expression if null or empty.
-		If expression is function, checks if the body is empty. 
+	Check whether an expression is null or empty. If the expression is a block
+	(e.g. a function body), it is empty when it contains no sub-expressions.
 
-		@param expr - The expression to check.
-		@returns [TODO:description]
-	 */
-	static public function isEmpty(expr:Expr) {
+	@param expr The expression to check.
+	@return Whether the expression is null or an empty block.
+	**/
+	public static function isEmpty(expr:Expr) {
 		if (expr == null) {
 			return true;
 		}
@@ -25,9 +29,12 @@ class TypeBuildingMacros {
 	}
 
 	/**
-	 * Checks if an expression is a constant expr.
-	 */
-	static public function isConstant(expr:Expr) {
+	Check whether an expression is a constant expression.
+
+	@param expr The expression to check.
+	@return Whether the expression is a non-empty constant.
+	**/
+	public static function isConstant(expr:Expr) {
 		if (isEmpty(expr)) {
 			return false;
 		}
@@ -36,11 +43,19 @@ class TypeBuildingMacros {
 			case ExprDef.EConst(c): true;
 			default: false;
 		}
-
-		return false;
 	}
 
-	static public function createFieldFromArg(arg, pos, doc, pub:Bool = false) {
+	/**
+	Create a class field from a constructor argument, carrying over any
+	matching `@param` documentation and the argument's default value.
+
+	@param arg The constructor argument to build a field from.
+	@param pos The position to assign to the generated field.
+	@param doc The owning constructor's doc comment, scanned for `@param` text.
+	@param pub Whether the created field should be public.
+	@return The generated field.
+	**/
+	public static function createFieldFromArg(arg, pos, doc, pub:Bool = false) {
 		var docRegex = new EReg('\\*\\s@param\\s${arg.name}\\s-?\\s?(.*)', "i");
 		var val = arg.value != null ? ExprTools.getValue(arg.value) : null;
 
@@ -59,7 +74,15 @@ class TypeBuildingMacros {
 		};
 	}
 
-	macro static public function initLocals(custom:Array<Expr> = null):Expr {
+	/**
+	Generate a block that assigns each local variable in scope to the matching
+	field on `this`, optionally prefixed with custom expressions. Used as the
+	generated body for constructors built by the other macros.
+
+	@param custom Optional expressions to prepend to the generated block.
+	@return A block expression assigning locals to their matching fields.
+	**/
+	public static macro function initLocals(custom:Array<Expr> = null):Expr {
 		// Grab the variables accessible in the context the macro was called.
 		var locals = Context.getLocalVars();
 		var fields = Context.getLocalClass().get().fields.get();
@@ -73,7 +96,7 @@ class TypeBuildingMacros {
 				throw new Error(Context.getLocalClass() + " has no field " + local, Context.currentPos());
 			}
 		}
-		// Generates a block expression from the given expression array
+		// Generates a block expression from the given expression array.
 		return macro $b{exprs};
 	}
 }

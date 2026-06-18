@@ -12,16 +12,17 @@ typedef TypeMacros = dropecho.macros.TypeBuildingMacros;
 
 class Constructor {
 	/**
-		Builds the body of a constructor based on the arguments.
-		Also creates fields on the class from them. 
+	Build the body of an existing empty constructor from its arguments, and
+	create matching fields on the class for each argument.
 
-		i.e. function new(a:Int, b:Int); 
-		this creates fields a,b on class, and assigns the passed value in body.
+	e.g. `function new(a:Int, b:Int);` creates fields `a` and `b` on the class
+	and assigns the passed values in the constructor body. If the constructor is
+	missing or already has a body, the fields are returned unchanged.
 
-		@param [pub] Should the created fields be public. 
-		@returns The created fields. 
-	 */
-	macro static public function fromArgs(pub:Bool = false):Array<Field> {
+	@param pub Whether the created fields should be public.
+	@return The build fields, including any fields created from the arguments.
+	**/
+	public static macro function fromArgs(pub:Bool = false):Array<Field> {
 		var fields = Context.getBuildFields();
 		var constructor = fields.find(x -> x.name == "new");
 
@@ -30,7 +31,7 @@ class Constructor {
 			default: null;
 		}
 
-		// if fn is null return or if the constructor exists, don't change it.
+		// If there is no constructor, or it already has a body, leave it alone.
 		// TODO: Extend it?
 		if (constructorFN == null || !TypeMacros.isEmpty(constructorFN.expr)) {
 			return fields;
@@ -45,17 +46,19 @@ class Constructor {
 	}
 
 	/**
-	 * Auto creates a constructor based on the fields of a class.
-	 *
-	 * @param [allOpt] Should all the params be optional? 
-	 * @returns The fields (including the generated constructor) in an array. 
-	 */
-	macro static public function fromFields(allOpt:Bool = false):Array<Field> {
+	Auto-create a constructor from the variable fields of a class. Each field
+	becomes a constructor argument that is assigned to `this` in the generated
+	body; the fields lose their inline initializer.
+
+	@param allOpt Whether every generated argument should be optional.
+	@return The build fields, including the generated constructor.
+	**/
+	public static macro function fromFields(allOpt:Bool = false):Array<Field> {
 		var fields = Context.getBuildFields();
 		var constructorArgs = [];
 		var assignmentExprs = [];
 
-		// build list of args for constructor from fields.
+		// Build the list of constructor args from the variable fields.
 		for (f in fields) {
 			switch (f.kind) {
 				case FVar(t, val):
@@ -63,7 +66,6 @@ class Constructor {
 						name: f.name,
 						type: t,
 						opt: allOpt,
-						value: TypeMacros.isConstant(val) ? $v{val} : null
 					});
 					f.kind = FieldType.FVar(t, null);
 				default:
@@ -71,7 +73,6 @@ class Constructor {
 		}
 
 		if (constructorArgs.length > 0) {
-			// Create new constructor.
 			fields.push({
 				name: "new",
 				access: [APublic],
@@ -87,7 +88,16 @@ class Constructor {
 		return fields;
 	}
 
-	macro static public function fromTypeDef(pub:Bool = false):Array<Field> {
+	/**
+	Build a class from a single configuration argument on its constructor. The
+	config object's fields are copied onto the class as fields, the constructor
+	body assigns them from the config, and a static `build` function is generated
+	that accepts the config fields broken out as individual arguments.
+
+	@param pub Whether the copied fields should be public.
+	@return The build fields, including the generated `build` function.
+	**/
+	public static macro function fromTypeDef(pub:Bool = false):Array<Field> {
 		var fields = Context.getBuildFields();
 		var constructor = fields.find(x -> x.name == "new");
 
@@ -146,7 +156,7 @@ class Constructor {
 				continue;
 			}
 
-			// Create field from configuration object fields.
+			// Create a field on the class from each configuration object field.
 			fields.push({
 				name: field.name,
 				access: [pub ? APublic : APrivate],
@@ -154,16 +164,15 @@ class Constructor {
 				kind: FieldType.FVar(fieldType)
 			});
 
-			// Create a function argument for the "build" function from config obj.
-			// like function new({x:1, y:1}) => function build(x:Int,y:Int){...}
+			// Create a `build` argument for each config field, e.g.
+			// `new({x:1, y:1})` => `build(x:Int, y:Int) {...}`.
 			buildArgs.push({
 				name: field.name,
 				type: fieldType,
 				opt: configIsClass,
-				//         value: valExpr != null ? $e{valExpr} : null
 			});
 
-			// Build assignment expressions for the built config object and the constructor.
+			// Assign the built config object and the constructor body.
 			if (configIsClass) {
 				buildExprs.push(macro $p{[objName, field.name]} = $i{field.name} != null ? $i{field.name} : $p{[objName, field.name]});
 			} else {
