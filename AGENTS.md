@@ -54,7 +54,7 @@ test/                        # utest cases, auto-discovered by filename (*Tests.
   dropecho/macros/
     ConstructorTests.hx      # build-macro example classes + assertions
     OptionalTests.hx
-.dropecho.testing.json       # test-runner config (root_package, hxml; instrument off)
+.dropecho.testing.json       # test-runner config (root_package, hxml)
 artifacts/                   # compiled test output
 ```
 
@@ -90,9 +90,8 @@ npm test             # → haxelib run dropecho.testing
   test file, constructing them, and asserting on the generated fields/constructor.
 - Macro-only imports/usings are wrapped in `#if macro`; macro classes themselves are not,
   so generated code can resolve them on the runtime target.
-- Coverage/instrument is disabled (`"instrument": null`): a compile-time-only library has
-  no runtime code to instrument, and enabling it makes the runner call `endCoverage()`
-  with no data.
+- No coverage/instrument: a compile-time-only library has no runtime code to instrument,
+  so the `instrument` block is omitted from `.dropecho.testing.json`.
 
 ---
 
