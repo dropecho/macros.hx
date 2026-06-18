@@ -2,6 +2,16 @@ package dropecho.macros;
 
 import utest.Assert;
 
+@:build(dropecho.macros.Constructor.fromArgs())
+class FromArgsPrivateExample {
+	public function new(test:Int = 1, bar:Int = 2);
+}
+
+@:build(dropecho.macros.Constructor.fromArgs(true))
+class FromArgsPublicExample {
+	public function new(test:Int = 1, bar:Int = 2);
+}
+
 @:nativeGen
 @:build(dropecho.macros.Constructor.fromFields(true))
 class FromFieldsExample {
@@ -35,16 +45,55 @@ class FromTypeDefExample2 {
 }
 
 class ConstructorTests extends utest.Test {
-	public function test_build_from_class_copies_fields() {
+	public function test_fromArgs_makes_fields_private_by_default() {
+		var built = new FromArgsPrivateExample();
+		Assert.equals(1, Reflect.field(built, "test"));
+		Assert.equals(2, Reflect.field(built, "bar"));
+	}
+
+	public function test_fromArgs_makes_fields_public_when_true() {
+		var built = new FromArgsPublicExample();
+		Assert.equals(1, built.test);
+		Assert.equals(2, built.bar);
+	}
+
+	public function test_fromFields_builds_constructor_from_fields() {
+		var built = new FromFieldsExample(5);
+		Assert.equals(5, built.test);
+	}
+
+	public function test_fromFields_applies_field_default_when_omitted() {
+		var built = new FromFieldsExample();
+		Assert.equals(1, built.test);
+	}
+
+	public function test_fromTypeDef_from_class_copies_fields() {
 		var built = new FromClassExample(new FromFieldsExample(5));
 		Assert.equals(5, built.test);
 	}
 
-	// TODO: re-enable as the macros stabilise (was covered by the buddy suite):
-	//  - fromFields: restore field defaults when an arg is omitted (the disabled
-	//    `value:` line in Constructor.fromFields), so `new FromFieldsExample().test == 1`.
-	//  - fromTypeDef from class: config object optional in constructor; generated
-	//    `build` breaks the type out into individual (optional) args.
-	//  - fromTypeDef from typedef object and typedef class-like: fields copied from
-	//    the typedef.
+	public function test_fromTypeDef_from_class_makes_config_optional() {
+		var built = new FromClassExample();
+		Assert.equals(1, built.test);
+	}
+
+	public function test_fromTypeDef_build_breaks_out_args() {
+		var built = FromClassExample.build(7, null);
+		Assert.equals(7, built.test);
+	}
+
+	public function test_fromTypeDef_build_args_are_optional() {
+		var built = FromClassExample.build();
+		Assert.equals(1, built.test);
+	}
+
+	public function test_fromTypeDef_from_typedef_object() {
+		var built = new FromTypeDefExample({test: 1, bar: 1});
+		Assert.equals(1, built.test);
+	}
+
+	public function test_fromTypeDef_from_typedef_class_like() {
+		var built = new FromTypeDefExample2({test: 1, bar: 1});
+		Assert.equals(1, built.test);
+	}
 }
