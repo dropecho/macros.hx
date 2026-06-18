@@ -1,38 +1,17 @@
---class-path src
---class-path test
+-cp src
+-cp test
 
-#test libs
-# -lib autotest
---library tink_macro
---library buddy
---library instrument
---define buddy-colors
+-lib utest
+-lib tink_macro
+-lib dropecho.testing
 
---macro instrument.Instrumentation.coverage(['dropecho'], ['src'], [])
---define coverage-console-summary-reporter
---define coverage-lcov-reporter
+-D analyzer-optimize
+-D analyzer-user-var-fusion
+-w -WDeprecated
 
--x TestMain
+--each
 
-# --each
-
-# --next
-# -lib hxnodejs
-# -D js-es=6
-# -js artifacts/test/js_test.js
-
-
-# --next
-# -neko artifacts/test/test.n
-# --next
-# -cs artifacts/test/cs_test
-
-# --next
-# --cmd echo "JS TESTS"
-# --cmd node ./artifacts/test/js_test.js
-
-# --cmd echo "NEKO TESTS"
-# --cmd neko ./artifacts/test/test.n
-
-# --cmd echo "CS TESTS"
-# --cmd ./artifacts/test/cs_test/bin/AutoTest.exe
+--next
+-lib hxnodejs
+-D js-es=6
+-js artifacts/js_test.cjs

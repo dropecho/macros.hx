@@ -6,7 +6,7 @@
   "repository": "github:dropecho/macros.hx",
   "license": "MIT",
   "scripts": {
-    "test": "haxe test.hxml"
+    "test": "haxelib run dropecho.testing"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.2",
