@@ -1,0 +1,4 @@
+-cp src
+--macro addGlobalMetadata('dropecho', '@:expose', true, true)
+--macro include('dropecho', true, null, ['src'])
+--lib tink_macro
