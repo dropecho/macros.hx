@@ -1,3 +1,21 @@
+# 1.0.0 (2026-06-19)
+
+
+### Bug Fixes
+
+* Add build script. ([d56e1a3](https://github.com/dropecho/macros.hx/commit/d56e1a3d9b88a0b4a32393b2820c8ed21e0aa111))
+* Add build.hxml ([57feb5d](https://github.com/dropecho/macros.hx/commit/57feb5d8dbb4545fe48fa30c0d32a58f713542d3))
+* Fix build.hxml ([d68750d](https://github.com/dropecho/macros.hx/commit/d68750d07633b006ea66def7cee7d475d65e6aac))
+* Fix some issues with auto-constructor, setup using buddy/autotest. ([b7212f5](https://github.com/dropecho/macros.hx/commit/b7212f5038a73d066fff034c5d73a4bbb6fa614f))
+
+
+### Features
+
+* add MathMacros.pow ([59154e7](https://github.com/dropecho/macros.hx/commit/59154e7902a020e2c74380044e192f16779c6b71))
+* Add package-lock ([31ea0f6](https://github.com/dropecho/macros.hx/commit/31ea0f6a9de316f02e6ec7a7e58cbe48d60b1156))
+* implement MakeOptional optional builder ([847c718](https://github.com/dropecho/macros.hx/commit/847c718d57950133f8671c5e1476deddf836bbd5))
+* restore fromFields defaults and harden fromTypeDef ([9438946](https://github.com/dropecho/macros.hx/commit/94389461e523b0d7ebac6d109e74a082e35dd4b5))
+
 ## [0.9.1](https://github.com/dropecho/lib_example/compare/0.9.0...0.9.1) (2022-12-03)
 
 
