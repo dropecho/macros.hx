@@ -80,6 +80,18 @@ var c = new Config();
 c.x = 1; // x and y copied from Point as Null<Int>
 ```
 
+### `MathMacros.pow`
+
+Unroll an integer power into repeated multiplication at compile time (no runtime
+`Math.pow`). Compound arguments are bound to a temporary so they evaluate once.
+
+```haxe
+import dropecho.macros.MathMacros;
+
+MathMacros.pow(t, 3);     // => t * t * t
+MathMacros.pow(1 - t, 2); // => { final b = 1 - t; b * b; }
+```
+
 ## Development
 
 ```bash

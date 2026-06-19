@@ -35,6 +35,7 @@ ships no runtime code of its own.
 | `Constructor` | `src/dropecho/macros/Constructor.hx` | `@:build` macros that generate constructors/fields: `fromArgs` (fill an empty constructor's body + fields from its args), `fromFields` (build a constructor from the class's variable fields), `fromTypeDef` (build a class + static `build` from a single config-object argument) |
 | `TypeBuildingMacros` | `src/dropecho/macros/TypeBuildingMacros.hx` | Shared compile-time helpers: `isEmpty`, `isConstant`, `createFieldFromArg`, and the `initLocals` macro used as the generated constructor body |
 | `MakeOptional` | `src/dropecho/macros/MakeOptional.hx` | `OptionalType.optional` — copies another type's variable fields onto the building class as public, optional (`Null<T>`) fields (methods and name collisions are skipped) |
+| `MathMacros` | `src/dropecho/macros/MathMacros.hx` | Expression macro `pow(value, count)` that unrolls an integer power into repeated multiplication at compile time (no runtime `Math.pow`) |
 
 All `Constructor`/`MakeOptional` functions are `macro` functions, so the classes compile
 to nothing on a runtime target — only the code they *generate* runs. Macro-only imports
@@ -49,7 +50,8 @@ still resolve them (e.g. `TypeBuildingMacros.initLocals()`).
 src/dropecho/macros/         # library source (all compile-time)
   Constructor.hx             # constructor/field build macros
   TypeBuildingMacros.hx      # shared compile-time helpers + initLocals
-  MakeOptional.hx            # WIP optional-fields build macro
+  MakeOptional.hx            # optional-fields build macro
+  MathMacros.hx              # compile-time math (pow)
 test/                        # utest cases, auto-discovered by filename (*Tests.hx)
   dropecho/macros/
     ConstructorTests.hx      # build-macro example classes + assertions
